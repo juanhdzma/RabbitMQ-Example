@@ -1,6 +1,6 @@
 import pika
 from envs import *
-from json import dumps
+from dto import Student
 
 def getPikaConnection():
     credentials = pika.PlainCredentials(RABBITMQ_USERNAME, RABBITMQ_PASSWORD)
@@ -11,11 +11,11 @@ def getConnection():
     parameters = pika.ConnectionParameters(RABBITMQ_HOST)
     return pika.BlockingConnection(parameters)
 
-def publishMessage(message: str):
+def publishMessage(message: Student):
     connection = getPikaConnection()
     channel = connection.channel()
     channel.queue_declare(queue=RABBITMQ_QUEUE, durable=True)
-    channel.basic_publish(exchange=RABBITMQ_EXCHANGE, routing_key=RABBITMQ_ROUTING, body=dumps({"message": message}))
+    channel.basic_publish(exchange=RABBITMQ_EXCHANGE, routing_key=RABBITMQ_ROUTING, body=message.model_dump_json())
     connection.close()
 
 def listenMessage(function):
